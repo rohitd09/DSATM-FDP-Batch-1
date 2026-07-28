@@ -42,6 +42,19 @@ class EmbeddingService:
 
         self.vector_store.add_documents(split_documents)
 
+    def retrieve_from_pdf(self, query: str):
+        retriever = self.vector_store.as_retriever(search_kwargs={"k": 3})
+        response = retriever.invoke(query)
+        return [doc.page_content for doc in response]
+
 if __name__ == "__main__":
     service = EmbeddingService()
     service.process_pdf_document()
+    # print(f'\n\nCHUNKS RETRIVED \n{service.retrieve_from_pdf("What are pointers?")}')
+
+    chunks = service.retrieve_from_pdf("What are pointers?")
+
+    print("HERE ARE THE CHUNKS: ")
+    for chunk in chunks:
+        print("\n\n")
+        print(chunk)
