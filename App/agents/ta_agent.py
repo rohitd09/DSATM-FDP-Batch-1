@@ -38,7 +38,10 @@ class TeachingAssistantAgent:
             api_key=os.getenv("GROQ_API_KEY")
         )
 
-    def run_llm(query: str) -> str:
+    def run_llm(self, state: dict) -> dict: # Brain
+        pass
+
+    def tool_node(self, state: dict) -> dict: # Action
         pass
 
 if __name__ ==  "__main__":
