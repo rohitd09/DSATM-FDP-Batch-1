@@ -42,7 +42,7 @@ class EmbeddingService:
 
         self.vector_store.add_documents(split_documents)
 
-    def retrieve_from_pdf(self, query: str):
+    def retrieve_from_pdf(self, query: str) -> list:
         retriever = self.vector_store.as_retriever(search_kwargs={"k": 3})
         response = retriever.invoke(query)
         return [doc.page_content for doc in response]
