@@ -21,6 +21,7 @@ class AcademicPapers(BaseModel):
     arxiv_id: str
     primary_category: str
     abstract: str
+
 @mcp.tool()
 def search_arxiv(query: str, max_results: int = 5):
     """
@@ -86,6 +87,24 @@ def search_live_web(query: str, search_depth: str = "basic", max_results: int = 
         include_answer=True
     )
 
+    return response
+
+# ---------------------------------------------------------
+# EXTRACT THE EXACT WEB PAGE CONTENT FROM THE URL
+# -------------------------------------------------------
+@mcp.tool()
+def extract_webpage_content(url: str):
+    """
+    Extracts raw text context directly from a specified URL.
+
+    Bypasses cookies banners, paywalls and heavy JS scripts to give
+    the pure LLM reading content.
+    """
+    tavily_client = TavilyClient(
+        api_key=os.getenv("TAVILY_API_KEY")
+    )
+
+    response = tavily_client.extract(url)
     return response
 
 if __name__ == "__main__":
