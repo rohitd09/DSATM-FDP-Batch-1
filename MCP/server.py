@@ -3,6 +3,11 @@ from fastmcp import FastMCP
 import arxiv
 from tavily import TavilyClient
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from pydantic import BaseModel
 
 mcp = FastMCP(
@@ -52,6 +57,36 @@ def search_arxiv(query: str, max_results: int = 5):
         ))
 
     return papers
+
+# --------------------------------------------------------------------
+# SEARCH FOR ARXIV PAPERS USING ARXIV ID
+# -----------------------------------------------------------------
+
+#--------------------------TAVILY------------------------------
+
+@mcp.tool()
+def search_live_web(query: str, search_depth: str = "basic", max_results: int = 5):
+    """
+    Searches the live internet using Tavily to retireve clean context, real-time facts,
+    and up to date documentations.
+
+    Use 'advanced' depth if looking for highly complex multi-source technical 
+    croo-referencing.
+
+    Only use 'Basic' or 'Advanced' search depth
+    """
+    tavily_client = TavilyClient(
+        api_key=os.getenv("TAVILY_API_KEY")
+    )
+
+    response = tavily_client.search(
+        query=query,
+        search_depth=search_depth,
+        max_results=max_results,
+        include_answer=True
+    )
+
+    return response
 
 if __name__ == "__main__":
     mcp.run()
