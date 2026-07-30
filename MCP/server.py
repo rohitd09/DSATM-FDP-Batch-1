@@ -63,6 +63,20 @@ def search_arxiv(query: str, max_results: int = 5):
 # SEARCH FOR ARXIV PAPERS USING ARXIV ID
 # -----------------------------------------------------------------
 
+from pypdf import PdfReader
+import tempfile
+
+@mcp.tool
+def fetch_arxiv_text(arxiv_id: str) -> str:
+    """
+    Fetch the full text of an arXiv paper given its ID (e.g. '2301.00001').
+    Downloads the PDF and extracts text from it.
+    """
+    client = arxiv.Client()
+    search = arxiv.Search(id_list=[arxiv_id])
+    paper = next(client.results(search))
+    return paper.summary
+
 #--------------------------TAVILY------------------------------
 
 @mcp.tool()
