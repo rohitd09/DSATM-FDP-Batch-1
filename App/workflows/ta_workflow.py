@@ -25,10 +25,10 @@ class TeachingAssistantWorkflow:
         workflow_builder = StateGraph(MessageState)
 
         workflow_builder.add_node("brain_node", 
-                                TeachingAssistantAgent.run_llm())
+                                TeachingAssistantAgent().run_llm)
 
         workflow_builder.add_node("action_node",
-                                TeachingAssistantAgent.tool_node())
+                                TeachingAssistantAgent().tool_node)
 
         workflow_builder.add_edge(START, "brain_node")
         workflow_builder.add_conditional_edges(
@@ -53,3 +53,9 @@ class TeachingAssistantWorkflow:
         )
 
         return result
+
+if __name__ == "__main__":
+    workflow = TeachingAssistantWorkflow()
+    result = workflow.run_ta_workflow("What are pointers?")
+    print("\n\n-------------------FINAL ANSWER--------------\n\n")
+    print(result)

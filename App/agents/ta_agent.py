@@ -43,8 +43,11 @@ class TeachingAssistantAgent:
 
         self.llm_with_tools = llm.bind_tools(tools_list)
 
+
+        self.tools_by_name = {tool.name: tool for tool in tools_list}
+
     def run_llm(self, state: dict) -> dict: # Brain
-        return {
+        result = {
             "messages": [
                 self.llm_with_tools.invoke(
                     [
@@ -71,8 +74,38 @@ class TeachingAssistantAgent:
             "llm_calls": state.get('llm_calls', 0) + 1
         }
 
+        print("\n\n-----------------------AI MESSAGE -------------------\n\n")
+        print(result)
+
+        return result
+
     def tool_node(self, state: dict) -> dict: # Action
-        pass
+        result = []
+
+        for tool_call in state['messages'][-1].tool_calls:
+
+            if 'self' in tool_call["args"]:
+                del tool_call["args"]['self']
+
+            tool = self.tools_by_name[tool_call["name"]]
+            observation = tool.invoke(tool_call["args"])
+
+            if isinstance(observation, list):
+                content_string = "\n".join(observation)
+            else:
+                content_string = str(observation)
+
+            result.append(
+                ToolMessage(
+                    content=content_string,
+                    tool_call_id=tool_call["id"]
+                )
+            )
+
+        print("\n\n-----------------------Tool MESSAGE -------------------\n\n")
+        print(result)
+        
+        return {"messages": result}
 
 if __name__ ==  "__main__":
     # query = input("Enter your query: ")
