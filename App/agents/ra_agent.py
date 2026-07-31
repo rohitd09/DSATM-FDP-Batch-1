@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class ResearchAssistantAgent:
-    def __init__(self):
+    def __init__(self, mcp_tools):
         llm = ChatGroq(
             model="openai/gpt-oss-20b",
             temperature=0.7,
@@ -15,7 +15,7 @@ class ResearchAssistantAgent:
             api_key=os.getenv("GROQ_API_KEY")
         )
 
-        tools_list = []
+        tools_list = mcp_tools
 
         self.llm_with_tools = llm.bind_tools(tools_list)
 
@@ -60,7 +60,7 @@ class ResearchAssistantAgent:
 
         return result
 
-    def tool_node(self, state: dict) -> dict: # Action
+    async def tool_node(self, state: dict) -> dict: # Action
         result = []
 
         for tool_call in state['messages'][-1].tool_calls:
@@ -69,7 +69,7 @@ class ResearchAssistantAgent:
                 del tool_call["args"]['self']
 
             tool = self.tools_by_name[tool_call["name"]]
-            observation = tool.invoke(tool_call["args"])
+            observation = await tool.ainvoke(tool_call["args"])
 
             if isinstance(observation, list):
                 content_string = "\n".join(observation)
