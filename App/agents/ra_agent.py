@@ -9,18 +9,18 @@ load_dotenv()
 class ResearchAssistantAgent:
     def __init__(self, mcp_tools):
         llm = ChatGroq(
-            model="openai/gpt-oss-20b",
+            model="meta-llama/llama-4-scout-17b-16e-instruct",
             temperature=0.7,
             max_tokens=1024,
             api_key=os.getenv("GROQ_API_KEY")
         )
 
-        tools_list = mcp_tools
+        self.tools_list = mcp_tools
 
-        self.llm_with_tools = llm.bind_tools(tools_list)
+        self.llm_with_tools = llm.bind_tools(self.tools_list)
 
 
-        self.tools_by_name = {tool.name: tool for tool in tools_list}
+        self.tools_by_name = {tool.name: tool for tool in self.tools_list}
 
     def run_llm(self, state: dict) -> dict: # Brain
         result = {
@@ -44,8 +44,10 @@ class ResearchAssistantAgent:
                     
                     CRITICAL INSTRUCTION:
                      - Rely ONLY on your provided tools for real-world factual claims.
-                     - You must ONLY execute a tools if its name EXACTLY matches one of the valid tool names: {tools_list}.
+                     - You must ONLY execute a tools if its name EXACTLY matches one of the valid tool names: {self.tools_list}.
                     - DO NOT hallucinate or guess a short name like `web search` if the server provides an explicit name.
+                    - DO NOT make more than 3 tool calls to give the response.
+                    - DO NOT CROSS THE TOOL CALL LIMITS. If 3 calls have been made. Generate a report with the current data.
                     """
                         )
                     ]
@@ -71,10 +73,7 @@ class ResearchAssistantAgent:
             tool = self.tools_by_name[tool_call["name"]]
             observation = await tool.ainvoke(tool_call["args"])
 
-            if isinstance(observation, list):
-                content_string = "\n".join(observation)
-            else:
-                content_string = str(observation)
+            content_string = str(observation)
 
             result.append(
                 ToolMessage(

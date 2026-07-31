@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from App.workflows.ta_workflow import TeachingAssistantWorkflow
+from App.workflows.ra_workflow import ResearchAssistantWorkflow
 
 from mcp.client.streamable_http import streamable_http_client
 from mcp.client.session import ClientSession
@@ -72,3 +73,11 @@ def ask_ta_agent(query: str):
 async def fetch_mcp_tools():
     tools = app.state.mcp_tools
     return { "tool_names": [tool.name for tool in tools] }
+
+@app.post("/ask-ra")
+async def call_ra_agent(query: str):
+    tools = app.state.mcp_tools
+    workflow = ResearchAssistantWorkflow(tools)
+
+    response = await workflow.run_ra_workflow(query)
+    return {"response": response}
